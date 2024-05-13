@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Management System</title>
+    <!-- External Stylesheets -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Custom Styles -->
+    <style>
+        body {
+            background-size: cover;
+            font-family: 'Roboto', sans-serif;
+        }
+        .container {
+            padding-top: 50px;
+        }
+        h1 {
+            color: #ffffff;
+            text-align: center;
+        }
+        table {
+            background-color: #ffffff;
+            border-radius: 5px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        .add-invoice {
+            background-color: #ffffff;
+            border-radius: 5px;
+            padding: 20px;
+        }
+        #edit-invoice-form {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<style>
+    body {
+      background-image: url('/image/image1.jpg')
+        }
+</style>
+<div class="container">
+    <h1>Invoice Management System</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Invoice Number</th>
+            <th>Customer Name</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="invoice-table">
+        <!-- Invoices will be populated here dynamically -->
+        </tbody>
+    </table>
+    <div class="add-invoice">
+        <h4>Add New Invoice</h4>
+        <input type="text" id="customerName" placeholder="Customer Name">
+        <input type="text" id="invoiceNumber" placeholder="Invoice Number">
+        <input type="number" id="amount" placeholder="Amount">
+        <input type="date" id="date">
+        <button onclick="addInvoice()">Add Invoice</button>
+        <div id="edit-invoice-form">
+            <h4>Edit Invoice</h4>
+            <input type="hidden" id="edit-invoice-id"> <!-- hidden field to store invoice id -->
+            <input type="text" id="editInvoiceNumber" placeholder="Invoice Number">
+            <input type="text" id="editCustomerName" placeholder="Customer Name">
+            <input type="number" id="editAmount" placeholder="Amount">
+            <input type="date" id="editDate">
+            <button id="update-invoice-btn" class="btn-floating waves-effect waves-light green"><i class="material-icons">check</i></button>
+            <button id="cancel-update-btn" class="btn-floating waves-effect waves-light red"><i class="material-icons">cancel</i>
+            </button>
+        </div>
+
+    </div>
+</div>
+<!-- External Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<!-- Custom JavaScript -->
+<script>
+    $(document).ready(function () {
+        getAllInvoices();
+    });
+
+    function getAllInvoices() {
+        // AJAX request to fetch all invoices from backend
+        $.ajax({
+            url: '/invoices/allInvoices',
+            type: 'GET',
+            success: function(data) {
+                // Populate the table dynamically with fetched data
+                populateInvoiceTable(data);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching invoices:', error);
+            }
+        });
+    }
+
+    function populateInvoiceTable(invoices) {
+        var tableBody = $('#invoice-table');
+        tableBody.empty();
+        $.each(invoices, function(index, invoice) {
+            var row = '<tr>' +
+                '<td>' + invoice.id + '</td>' +
+                '<td>' + invoice.invoiceNumber + '</td>' +
+                '<td>' + invoice.customerName + '</td>' +
+                '<td>' + invoice.amount + '</td>' +
+                '<td>' + invoice.date + '</td>' +
+                '<td>' +
+                '<button onclick="populateEditForm(' + invoice.id + ')">Edit</button>' +
+                '<button onclick="deleteInvoice(' + invoice.id + ')">Delete</button>' +
+                '</td>' +
+                '</tr>';
+            tableBody.append(row);
+        });
+    }
+
+    function addInvoice() {
+        var formData = {
+            invoiceNumber: $('#invoiceNumber').val(),
+            customerName: $('#customerName').val(),
+            amount: $('#amount').val(),
+            date: $('#date').val()
+        };
+        $.ajax({
+            url: '/invoices',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function(data) {
+                getAllInvoices();
+            },
+            error: function(xhr, status, error) {
+                console.error('Error adding invoice:', error);
+            }
+        });
+    }
+
+    function populateEditForm(id) {
+        $.ajax({
+            url: '/invoices/' + id,
+            type: 'GET',
+            success: function(data) {
+                $('#edit-invoice-id').val(data.id); // set invoice id
+                $('#editInvoiceNumber').val(data.invoiceNumber);
+                $('#editCustomerName').val(data.customerName);
+                $('#editAmount').val(data.amount);
+                $('#editDate').val(data.date);
+                $('#edit-invoice-form').show();
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching invoice details:', error);
+            }
+        });
+    }
+
+    $("#update-invoice-btn").click(function() {
+        var invoice = {
+            id: $("#edit-invoice-id").val(),
+            invoiceNumber: $("#editInvoiceNumber").val(), // corrected id
+            customerName: $("#editCustomerName").val(),
+            amount: $("#editAmount").val(),
+            date: $("#editDate").val()
+        };
+        $.ajax({
+            type: "PUT",
+            url: "/invoices/" + invoice.id,
+            contentType: "application/json",
+            data: JSON.stringify(invoice),
+            success: function() {
+                getAllInvoices();
+                hideEditForm();
+            }
+        });
+    });
+
+    // Function to handle cancel update button click
+    $("#cancel-update-btn").click(function() {
+        hideEditForm();
+    });
+
+    function deleteInvoice(id) {
+        $.ajax({
+            url: '/invoices/' + id,
+            type: 'DELETE',
+            success: function() {
+                getAllInvoices();
+            },
+            error: function(xhr, status, error) {
+                console.error('Error deleting invoice:', error);
+            }
+        });
+    }
+
+    function showEditForm() {
+        $('#edit-invoice-form').show();
+    }
+
+    function hideEditForm() {
+        $('#edit-invoice-form').hide();
+    }
+
+    function cancelEdit() {
+        hideEditForm();
+    }
+</script>
+
+</body>
+</html>
