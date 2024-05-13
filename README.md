@@ -65,7 +65,7 @@ Before running the application, make sure you have the following installed on yo
 Open your web browser and go to http://localhost:8080/invoices/home to access the application.
 
 6. **Endpoints:**
-- **GET /invoices/allTasks**: Get all invoices.
+- **GET /invoices/allInvoices**: Get all invoices.
 - **GET /invoices/{id}**: Get an invoice by ID.
 - **POST /invoices**: Create a new invoice.
 - **PUT /invoices/{id}**: Update an existing invoice.
