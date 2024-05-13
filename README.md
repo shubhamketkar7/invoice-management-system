@@ -64,28 +64,17 @@ Before running the application, make sure you have the following installed on yo
 5. **Access the Application**:
 Open your web browser and go to http://localhost:8080/invoices/home to access the application.
 
-- **Endpoints:**
+6. **Endpoints:**
 - **GET /invoices/allTasks**: Get all invoices.
 - **GET /invoices/{id}**: Get an invoice by ID.
 - **POST /invoices**: Create a new invoice.
 - **PUT /invoices/{id}**: Update an existing invoice.
 - **DELETE /invoices/{id}**: Delete an invoice by ID.
 
-- **Frontend Structure:**
+7. **Frontend Structure:**
 - The frontend is implemented using HTML and JavaScript.
 - The main HTML file is `index.html`, which contains the structure for displaying invoices in a table and forms for adding and editing invoices.
 - Inline JavaScript is used within `index.html` to handle user interactions such as fetching invoices via AJAX, populating the table dynamically, adding new invoices, editing existing invoices, and deleting invoices.
-
-## Database Schema
-
-- The application uses a PostgreSQL database with the following schema:  
-   ```bash
-   CREATE TABLE invoices (
-   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-   invoice_number VARCHAR(255) NOT NULL UNIQUE,
-   date DATE, amount DECIMAL(10,2),
-   customer_name VARCHAR(255)
-   );
 
 ## Contributing
 
